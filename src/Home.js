@@ -16,7 +16,10 @@ class Home extends React.Component {
             <Link to="/space-station-entry">Space Station Entry</Link>
           </li>
           <li>
-            <Link to="/spaceport-entry">Spaceport Entry</Link>
+            <Link to="/planet-spaceport-entry">Planet Spaceport Entry</Link>
+          </li>
+          <li>
+            <Link to="/station-spaceport-entry">Station Spaceport Entry</Link>
           </li>
           <li>
             <Link to="/route-entry">Route Entry</Link>

@@ -8,16 +8,17 @@ import {
 
 import Home from "./Home";
 
-import PlanetEntry from "./PlanetEntry";
-import SpaceStationEntry from "./SpaceStationEntry";
-import SpaceportEntry from "./SpaceportEntry";
-import RouteEntry from "./RouteEntry";
-import SpacecraftEntry from "./SpacecraftEntry";
-import FlightEntry from "./FlightEntry";
+import PlanetEntry from "./components/entries/PlanetEntry";
+import SpaceStationEntry from "./components/entries/SpaceStationEntry";
+import PlanetSpaceportEntry from "./components/entries/PlanetSpaceportEntry";
+import StationSpaceportEntry from "./components/entries/StationSpaceportEntry";
+import RouteEntry from "./components/entries/RouteEntry";
+import SpacecraftEntry from "./components/entries/SpacecraftEntry";
+import FlightEntry from "./components/entries/FlightEntry";
 
-import SpaceportQuery from "./SpaceportQuery";
-import RouteQuery from "./RouteQuery";
-import FlightFinder from "./FlightFinder";
+import SpaceportQuery from "./components/queries/SpaceportQuery";
+import RouteQuery from "./components/queries/RouteQuery";
+import FlightFinder from "./components/queries/FlightFinder";
 
 function App() {
   return (
@@ -28,7 +29,14 @@ function App() {
         {/* Data Entry */}
         <Route path="/planet-entry" element={<PlanetEntry />} />
         <Route path="/space-station-entry" element={<SpaceStationEntry />} />
-        <Route path="/spaceport-entry" element={<SpaceportEntry />} />
+        <Route
+          path="/planet-spaceport-entry"
+          element={<PlanetSpaceportEntry />}
+        />
+        <Route
+          path="/station-spaceport-entry"
+          element={<StationSpaceportEntry />}
+        />
         <Route path="/route-entry" element={<RouteEntry />} />
         <Route path="/spacecraft-entry" element={<SpacecraftEntry />} />
         <Route path="/flight-entry" element={<FlightEntry />} />
