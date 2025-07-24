@@ -15,6 +15,7 @@ import StationSpaceportEntry from "./components/entries/StationSpaceportEntry";
 import RouteEntry from "./components/entries/RouteEntry";
 import SpacecraftEntry from "./components/entries/SpacecraftEntry";
 import FlightEntry from "./components/entries/FlightEntry";
+import AdvancedFlightEntry from "./components/entries/AdvancedFlightEntry";
 
 import SpaceportQuery from "./components/queries/SpaceportQuery";
 import RouteQuery from "./components/queries/RouteQuery";
@@ -40,6 +41,10 @@ function App() {
         <Route path="/route-entry" element={<RouteEntry />} />
         <Route path="/spacecraft-entry" element={<SpacecraftEntry />} />
         <Route path="/flight-entry" element={<FlightEntry />} />
+        <Route
+          path="/advanced-flight-entry"
+          element={<AdvancedFlightEntry />}
+        />
 
         {/* Queries */}
         <Route path="/spaceport-query" element={<SpaceportQuery />} />

@@ -30,6 +30,9 @@ class Home extends React.Component {
           <li>
             <Link to="/flight-entry">Flight Entry</Link>
           </li>
+          <li>
+            <Link to="/advanced-flight-entry">Advanced Flight Entry</Link>
+          </li>
         </ul>
 
         <h2>🔍 Queries</h2>
