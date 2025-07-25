@@ -99,14 +99,6 @@ function FlightEntry() {
       return;
     }
 
-    const isDuplicate = flights.some(
-      (f) => f.flightNumber.toLowerCase() === flightNumber.trim().toLowerCase()
-    );
-    if (isDuplicate) {
-      setMessage({ text: "This flight number already exists.", type: "error" });
-      return;
-    }
-
     const payload = {
       flightNumber: flightNumber.trim(),
       originSpaceportName: route.originSpaceportName,
@@ -133,10 +125,10 @@ function FlightEntry() {
       fetchFlights();
     } catch (err) {
       console.error("Failed to add flight:", err);
+      const backendMessage =
+        err.response?.data?.message || err.response?.data || err.message;
       setMessage({
-        text:
-          "Error adding flight: " +
-          (err.response?.data?.message || err.message),
+        text: "Error adding flight: " + backendMessage,
         type: "error",
       });
     }
