@@ -58,18 +58,38 @@ export default function AdvancedFlightEntry() {
 
     // Step 1: select or supply distance for new route
     if (step === 1) {
-      if (!origin || !dest || origin === dest) {
-        setMsg({ text: "Select valid origin and destination.", type: "error" });
+      if (!origin || !dest) {
+        setMsg({
+          text: "Please select both origin and destination.",
+          type: "error",
+        });
         return;
       }
+      const [origName, origPlanet] = origin.split("|");
+      const [destName, destPlanet] = dest.split("|");
+      if (origin === dest) {
+        setMsg({
+          text: "Origin and destination cannot be the same port.",
+          type: "error",
+        });
+        return;
+      }
+      if (origPlanet === destPlanet) {
+        setMsg({
+          text: "Origin and destination must be on different planets.",
+          type: "error",
+        });
+        return;
+      }
+
       if (!needDist) {
         try {
           const r = await axios.get("http://localhost:8080/api/routes/get", {
             params: {
-              originSpaceportName: origin.split("|")[0],
-              originPlanetName: origin.split("|")[1],
-              destinationSpaceportName: dest.split("|")[0],
-              destinationPlanetName: dest.split("|")[1],
+              originSpaceportName: origName,
+              originPlanetName: origPlanet,
+              destinationSpaceportName: destName,
+              destinationPlanetName: destPlanet,
             },
           });
           setDist(String(r.data.distance));
@@ -92,6 +112,7 @@ export default function AdvancedFlightEntry() {
         }
         return;
       }
+
       // user supplies distance for new route
       if (!dist || isNaN(dist) || parseFloat(dist) <= 0) {
         setMsg({
