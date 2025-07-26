@@ -1,45 +1,100 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 function FlightFinder() {
-  return (
-    <div>
-      <h1>Flight Finder</h1>
+    const [formData, setFormData] = useState({
+        originSpaceport: "",
+        originPlanet: "",
+        destinationSpaceport: "",
+        destinationPlanet: "",
+        dayOfWeek: "",
+        earliestTime: "",
+        maxStops: "",
+        maxTravelTime: "",
+    });
 
-      <form>
-        <label htmlFor="origin">Origin Spaceport</label>
-        <input type="text" id="origin" />
+    const [itineraries, setItineraries] = useState([]);
+    const [hasSearched, setHasSearched] = useState(false);
 
-        <label htmlFor="originPlanet">Origin Planet</label>
-        <input type="text" id="originPlanet" />
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id]: e.target.value });
+    };
 
-        <label htmlFor="destination">Destination Spaceport</label>
-        <input type="text" id="destination" />
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        <label htmlFor="destinationPlanet">Destination Planet</label>
-        <input type="text" id="destinationPlanet" />
+        try {
+            const cleanedParams = {
+                ...formData,
+                maxStops: formData.maxStops ? parseInt(formData.maxStops) : 0,
+                maxTravelTime: formData.maxTravelTime ? parseFloat(formData.maxTravelTime) : 0,
+            };
 
-        <label htmlFor="dayOfWeek">Day of Week</label>
-        <input type="text" id="dayOfWeek" />
+            const response = await axios.get("http://localhost:8080/api/flights/search", {
+                params: cleanedParams,
+            });
 
-        <label htmlFor="earliestTime">Earliest Departure Time</label>
-        <input type="text" id="earliestTime" />
+            setItineraries(response.data);
+        } catch (error) {
+            console.error("❌ Error fetching itineraries:", error);
+            setItineraries([]); // fallback
+        } finally {
+            setHasSearched(true); // trigger result section
+        }
+    };
 
-        <label htmlFor="maxStops">Maximum Stops</label>
-        <input type="number" id="maxStops" />
+    return (
+        <div>
+            <h1>Flight Finder</h1>
+            <form onSubmit={handleSubmit} autoComplete="off">
+                <label htmlFor="originSpaceport">Origin Spaceport</label>
+                <input type="text" id="originSpaceport" value={formData.originSpaceport} onChange={handleChange} />
 
-        <label htmlFor="maxTravelTime">Maximum Travel Time (hours)</label>
-        <input type="text" id="maxTravelTime" />
+                <label htmlFor="originPlanet">Origin Planet</label>
+                <input type="text" id="originPlanet" value={formData.originPlanet} onChange={handleChange} />
 
-        <button type="submit">Find Flights</button>
-      </form>
+                <label htmlFor="destinationSpaceport">Destination Spaceport</label>
+                <input type="text" id="destinationSpaceport" value={formData.destinationSpaceport} onChange={handleChange} />
 
-      <h2>Matching Itineraries</h2>
-      <ul>
-        <li>Itinerary: F123 → F567 Total Time: 5.5 hrs Stops: 1</li>
-      </ul>
-    </div>
-  );
+                <label htmlFor="destinationPlanet">Destination Planet</label>
+                <input type="text" id="destinationPlanet" value={formData.destinationPlanet} onChange={handleChange} />
+
+                <label htmlFor="dayOfWeek">Day of Week</label>
+                <input type="text" id="dayOfWeek" value={formData.dayOfWeek} onChange={handleChange} />
+
+                <label htmlFor="earliestTime">Earliest Departure Time</label>
+                <input type="text" id="earliestTime" value={formData.earliestTime} onChange={handleChange} />
+
+                <label htmlFor="maxStops">Maximum Stops</label>
+                <input type="number" id="maxStops" value={formData.maxStops} onChange={handleChange} />
+
+                <label htmlFor="maxTravelTime">Maximum Travel Time (hours)</label>
+                <input type="text" id="maxTravelTime" value={formData.maxTravelTime} onChange={handleChange} />
+
+                <button type="submit">Find Flights</button>
+            </form>
+
+            {hasSearched && (
+                <div>
+                    <h2>Matching Itineraries</h2>
+                    <ul>
+                        {itineraries.length === 0 ? (
+                            <li>No itineraries found</li>
+                        ) : (
+                            itineraries.map((itinerary, index) => (
+                                <li key={index}>
+                                    Itinerary:{" "}
+                                    {itinerary.flights?.map(f => f.flightNumber).join(" → ")} |{" "}
+                                    Total Time: {itinerary.totalTime} hrs |{" "}
+                                    Stops: {itinerary.totalStops}
+                                </li>
+                            ))
+                        )}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default FlightFinder;
