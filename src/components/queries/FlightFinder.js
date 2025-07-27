@@ -1,100 +1,178 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function FlightFinder() {
-    const [formData, setFormData] = useState({
-        originSpaceport: "",
-        originPlanet: "",
-        destinationSpaceport: "",
-        destinationPlanet: "",
-        dayOfWeek: "",
-        earliestTime: "",
-        maxStops: "",
-        maxTravelTime: "",
-    });
+  const [spaceports, setSpaceports] = useState([]);
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [dayOfWeek, setDayOfWeek] = useState("Monday");
+  const [startTime, setStartTime] = useState("08:00:00");
+  const [maxStops, setMaxStops] = useState(0);
+  const [maxTotalHours, setMaxTotalHours] = useState(24);
+  const [itineraries, setItineraries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [searched, setSearched] = useState(false);
 
-    const [itineraries, setItineraries] = useState([]);
-    const [hasSearched, setHasSearched] = useState(false);
+  const daysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
-    };
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/spaceports")
+      .then((res) => setSpaceports(res.data))
+      .catch((err) => console.error("Error fetching spaceports", err));
+  }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            const cleanedParams = {
-                ...formData,
-                maxStops: formData.maxStops ? parseInt(formData.maxStops) : 0,
-                maxTravelTime: formData.maxTravelTime ? parseFloat(formData.maxTravelTime) : 0,
-            };
-
-            const response = await axios.get("http://localhost:8080/api/flights/search", {
-                params: cleanedParams,
-            });
-
-            setItineraries(response.data);
-        } catch (error) {
-            console.error("❌ Error fetching itineraries:", error);
-            setItineraries([]); // fallback
-        } finally {
-            setHasSearched(true); // trigger result section
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setSearched(true);
+    if (!origin || !destination) {
+      setError("Select origin, destination, and day of week");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    const [originName, originPlanet] = origin.split("|");
+    const [destName, destPlanet] = destination.split("|");
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/flights/itineraries",
+        {
+          params: {
+            originSpaceportName: originName,
+            originPlanetName: originPlanet,
+            destSpaceportName: destName,
+            destPlanetName: destPlanet,
+            dayOfWeek,
+            startTime,
+            maxStops,
+            maxTotalHours,
+          },
         }
-    };
+      );
+      setItineraries(res.data);
+    } catch (err) {
+      console.error("Error fetching itineraries", err);
+      setError("Error fetching itineraries");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div>
-            <h1>Flight Finder</h1>
-            <form onSubmit={handleSubmit} autoComplete="off">
-                <label htmlFor="originSpaceport">Origin Spaceport</label>
-                <input type="text" id="originSpaceport" value={formData.originSpaceport} onChange={handleChange} />
+  return (
+    <div className="flight-finder">
+      <h1>Flight Finder</h1>
+      {error && <p className="error">{error}</p>}
+      <form onSubmit={handleSearch}>
+        <label>Origin:</label>
+        <select value={origin} onChange={(e) => setOrigin(e.target.value)}>
+          <option value="">--Select Origin--</option>
+          {spaceports.map((sp) => {
+            const planet = sp.planetName ?? sp.planet?.name ?? "";
+            return (
+              <option
+                key={`${sp.name}|${planet}`}
+                value={`${sp.name}|${planet}`}
+              >
+                {`${sp.name} (${planet})`}
+              </option>
+            );
+          })}
+        </select>
 
-                <label htmlFor="originPlanet">Origin Planet</label>
-                <input type="text" id="originPlanet" value={formData.originPlanet} onChange={handleChange} />
+        <label>Destination:</label>
+        <select
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+        >
+          <option value="">--Select Destination--</option>
+          {spaceports.map((sp) => {
+            const planet = sp.planetName ?? sp.planet?.name ?? "";
+            return (
+              <option
+                key={`${sp.name}|${planet}`}
+                value={`${sp.name}|${planet}`}
+              >
+                {`${sp.name} (${planet})`}
+              </option>
+            );
+          })}
+        </select>
 
-                <label htmlFor="destinationSpaceport">Destination Spaceport</label>
-                <input type="text" id="destinationSpaceport" value={formData.destinationSpaceport} onChange={handleChange} />
+        <label>Day of Week:</label>
+        <select
+          value={dayOfWeek}
+          onChange={(e) => setDayOfWeek(e.target.value)}
+        >
+          {daysOfWeek.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
 
-                <label htmlFor="destinationPlanet">Destination Planet</label>
-                <input type="text" id="destinationPlanet" value={formData.destinationPlanet} onChange={handleChange} />
+        <label>Start Time:</label>
+        <input
+          type="time"
+          step="1"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
 
-                <label htmlFor="dayOfWeek">Day of Week</label>
-                <input type="text" id="dayOfWeek" value={formData.dayOfWeek} onChange={handleChange} />
+        <label>Max Stops:</label>
+        <input
+          type="number"
+          min="0"
+          value={maxStops}
+          onChange={(e) => setMaxStops(parseInt(e.target.value, 10))}
+        />
 
-                <label htmlFor="earliestTime">Earliest Departure Time</label>
-                <input type="text" id="earliestTime" value={formData.earliestTime} onChange={handleChange} />
+        <label>Max Total Hours:</label>
+        <input
+          type="number"
+          step="0.1"
+          value={maxTotalHours}
+          onChange={(e) => setMaxTotalHours(parseFloat(e.target.value))}
+        />
 
-                <label htmlFor="maxStops">Maximum Stops</label>
-                <input type="number" id="maxStops" value={formData.maxStops} onChange={handleChange} />
+        <button type="submit" disabled={loading}>
+          {loading ? "Searching..." : "Search"}
+        </button>
+      </form>
 
-                <label htmlFor="maxTravelTime">Maximum Travel Time (hours)</label>
-                <input type="text" id="maxTravelTime" value={formData.maxTravelTime} onChange={handleChange} />
-
-                <button type="submit">Find Flights</button>
-            </form>
-
-            {hasSearched && (
-                <div>
-                    <h2>Matching Itineraries</h2>
-                    <ul>
-                        {itineraries.length === 0 ? (
-                            <li>No itineraries found</li>
-                        ) : (
-                            itineraries.map((itinerary, index) => (
-                                <li key={index}>
-                                    Itinerary:{" "}
-                                    {itinerary.flights?.map(f => f.flightNumber).join(" → ")} |{" "}
-                                    Total Time: {itinerary.totalTime} hrs |{" "}
-                                    Stops: {itinerary.totalStops}
-                                </li>
-                            ))
-                        )}
-                    </ul>
-                </div>
-            )}
+      {searched && (
+        <div className="results">
+          <h2>Results</h2>
+          {itineraries.length === 0 ? (
+            <p>No itineraries found.</p>
+          ) : (
+            itineraries.map((path, idx) => (
+              <div key={idx} className="itinerary">
+                <h3>Itinerary {idx + 1}</h3>
+                <ul>
+                  {path.map((f) => (
+                    <li key={f.flightNumber}>
+                      <strong>{f.flightNumber}</strong>: {f.originSpaceportName}{" "}
+                      → {f.destinationSpaceportName}, departs {f.departureTime},{" "}
+                      {f.flightTime}h
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
         </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default FlightFinder;
