@@ -34,14 +34,21 @@ function FlightFinder() {
   const handleSearch = async (e) => {
     e.preventDefault();
     setSearched(true);
+
     if (!origin || !destination) {
       setError("Select origin, destination, and day of week");
       return;
     }
+    if (maxTotalHours < 0) {
+      setError("Max total hours must be non-negative.");
+      return;
+    }
+
     setError("");
     setLoading(true);
     const [originName, originPlanet] = origin.split("|");
     const [destName, destPlanet] = destination.split("|");
+
     try {
       const res = await axios.get(
         "http://localhost:8080/api/flights/itineraries",
@@ -139,6 +146,7 @@ function FlightFinder() {
         <input
           type="number"
           step="0.1"
+          min="0"
           value={maxTotalHours}
           onChange={(e) => setMaxTotalHours(parseFloat(e.target.value))}
         />
