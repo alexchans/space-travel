@@ -47,6 +47,11 @@ function PlanetSpaceportEntry() {
       return;
     }
 
+    if (parseInt(capacity) < 0 || parseFloat(feePerSeat) < 0) {
+      alert("Capacity and Fee Per Seat must be non-negative.");
+      return;
+    }
+
     const isDuplicate = spaceports.some(
       (port) =>
         port.name.toLowerCase() === name.toLowerCase() &&

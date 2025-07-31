@@ -70,6 +70,11 @@ function RouteEntry() {
       return;
     }
 
+    if (parseInt(distance) < 0) {
+      setMessage({ text: "Distance must be non-negative.", type: "error" });
+      return;
+    }
+
     const routePayload = {
       originSpaceportName: originSpaceportName.trim(),
       originPlanetName:

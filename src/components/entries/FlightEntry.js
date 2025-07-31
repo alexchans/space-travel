@@ -93,6 +93,11 @@ function FlightEntry() {
       return;
     }
 
+    if (parseFloat(flightTime) < 0) {
+      setMessage({ text: "Flight time must be non-negative.", type: "error" });
+      return;
+    }
+
     const route = routes[parseInt(selectedRouteIndex)];
     if (!route) {
       setMessage({ text: "Invalid route selected.", type: "error" });

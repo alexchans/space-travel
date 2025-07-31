@@ -50,6 +50,14 @@ function SpacecraftEntry() {
       return;
     }
 
+    if (parseInt(capacity) < 0 || parseInt(range) < 0) {
+      setMessage({
+        text: "Capacity and Range must be non-negative.",
+        type: "error",
+      });
+      return;
+    }
+
     const isDuplicate = spacecrafts.some(
       (c) => c.typeName.toLowerCase() === typeName.trim().toLowerCase()
     );

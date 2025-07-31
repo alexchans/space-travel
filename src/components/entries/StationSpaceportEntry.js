@@ -48,6 +48,14 @@ function StationSpaceportEntry() {
       return;
     }
 
+    if (parseInt(capacity) < 0 || parseFloat(feePerSeat) < 0) {
+      setMessage({
+        text: "Capacity and Fee must be non-negative.",
+        type: "error",
+      });
+      return;
+    }
+
     const isDuplicate = spaceports.some(
       (p) => p.station?.name.toLowerCase() === stationName.toLowerCase().trim()
     );

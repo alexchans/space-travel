@@ -41,6 +41,14 @@ function PlanetEntry() {
       population: parseInt(formData.population),
     };
 
+    if (payload.size < 0 || payload.population < 0) {
+      setMessage({
+        text: "Size and population must be non-negative.",
+        type: "error",
+      });
+      return;
+    }
+
     axios
       .post("http://localhost:8080/api/planets", payload)
       .then((res) => {
